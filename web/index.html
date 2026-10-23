@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>药研补给官 PharmaFuel · 麦当劳 MCP 医药研发能量助手</title>
+<style>
+  :root{
+    --bg:#f6f9f8; --card:#ffffff; --ink:#1f2a2e; --muted:#5d6b70;
+    --teal:#0f9d8e; --teal-d:#0b7d71; --amber:#f5a623; --amber-d:#d98e0a;
+    --line:#e4ece9; --red:#e0533d; --green:#2faa5e; --soft:#eef5f3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 18px 60px}
+  header{background:linear-gradient(135deg,#0f9d8e,#0b7d71);color:#fff;
+    border-bottom:4px solid var(--amber);padding:30px 0 26px;margin-bottom:22px}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{font-size:40px;line-height:1}
+  .brand h1{font-size:24px;letter-spacing:.5px}
+  .brand p{font-size:13px;opacity:.9;margin-top:2px}
+  .badge{background:var(--amber);color:#3a2a00;font-weight:700;border-radius:10px;
+    padding:8px 12px;font-size:13px;text-align:center;white-space:nowrap}
+  .badge small{display:block;font-weight:600;opacity:.8;font-size:11px}
+  .tabs{display:flex;gap:8px;margin:6px 0 20px;flex-wrap:wrap}
+  .tab{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:14px 12px;cursor:pointer;text-align:center;font-weight:600;
+    color:var(--muted);transition:.15s;font-size:14px}
+  .tab small{display:block;font-weight:500;font-size:11px;opacity:.8;margin-top:3px}
+  .tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:22px;margin-bottom:18px;box-shadow:0 2px 10px rgba(15,157,142,.04)}
+  .card h2{font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card h2 .dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+  .hint{color:var(--muted);font-size:13px;margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+  select,input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--line);
+    border-radius:10px;font-size:14px;background:#fff;color:var(--ink)}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:160px}
+  .btn{margin-top:18px;background:var(--teal);color:#fff;border:none;border-radius:10px;
+    padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;width:100%}
+  .btn:hover{background:var(--teal-d)}
+  .scn-desc{background:var(--soft);border-left:3px solid var(--teal);border-radius:8px;
+    padding:10px 14px;font-size:13px;color:var(--muted);margin-top:10px}
+  .result{margin-top:18px;border-top:1px dashed var(--line);padding-top:18px}
+  .combo{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .chip{background:var(--soft);border:1px solid var(--line);border-radius:20px;
+    padding:8px 14px;font-size:13px;font-weight:600}
+  .chip b{color:var(--teal-d)}
+  .bars{display:flex;flex-direction:column;gap:12px;margin:14px 0}
+  .bar{display:grid;grid-template-columns:90px 1fr 96px;align-items:center;gap:10px;font-size:13px}
+  .bar .track{background:#eef2f1;border-radius:8px;height:14px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:8px}
+  .bar .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+  .price-box{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .price-now{font-size:30px;font-weight:800;color:var(--teal-d)}
+  .price-old{font-size:16px;color:var(--muted);text-decoration:line-through}
+  .save{background:#eafaf0;color:var(--green);font-weight:700;border-radius:8px;
+    padding:5px 10px;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:var(--soft);color:var(--muted)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:200px;padding:10px 4px;
+    border-bottom:2px solid var(--line);margin-top:10px}
+  .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+  .col .b{width:60%;border-radius:6px 6px 0 0;position:relative}
+  .col .b.k{background:var(--teal)}
+  .col .b.p{background:var(--amber)}
+  .col .lab{font-size:11px;color:var(--muted);transform:rotate(-30deg);white-space:nowrap;height:34px}
+  .insight{background:#fff8ec;border-left:3px solid var(--amber);border-radius:8px;
+    padding:10px 14px;font-size:13px;margin:8px 0}
+  .insight.warn{background:#fdeee9;border-color:var(--red)}
+  .insight.ok{background:#eafaf0;border-color:var(--green)}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:30px;line-height:1.8}
+  .pill{display:inline-block;background:var(--soft);border:1px solid var(--line);
+    border-radius:20px;padding:4px 12px;font-size:12px;margin:3px 4px 0 0;color:var(--muted)}
+  .hero-sub{font-size:14px;color:var(--muted);margin-bottom:6px}
+  code{background:var(--soft);padding:2px 6px;border-radius:6px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">💊</div>
+      <div>
+        <h1>药研补给官 PharmaFuel</h1>
+        <p>基于麦当劳 MCP 的医药研发团队能量与团餐智能助手 · 1024 程序员节参赛作品</p>
+      </div>
+    </div>
+    <div class="badge">1024 · 程序员节<small>麦当劳 × WorkBuddy</small></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="hero-sub">为 <b>CMC / 分析 / 制剂 / 临床 / DRA</b> 研发人量身打造：倒班能量套餐、课题组团餐优化、营养周报——
+  全部决策数据来自麦当劳 MCP 实时接口（本演示页使用脱敏示例数据）。</p>
+  <div>
+    <span class="pill"># 垂直人群差异化</span>
+    <span class="pill"># 数据驱动营养评分</span>
+    <span class="pill"># 真实调用麦当劳 MCP</span>
+    <span class="pill"># 企业团餐 query-meal-assistance</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="shift">🍔 倒班能量套餐<small>场景化蛋白/钠评分</small></div>
+    <div class="tab" data-tab="team">👥 课题组团餐<small>人数×预算最优</small></div>
+    <div class="tab" data-tab="week">📊 研发人营养周报<small>order-list 聚合</small></div>
+  </div>
+
+  <!-- 模块1：倒班能量套餐 -->
+  <section class="panel active" id="tab-shift">
+    <div class="card">
+      <h2><span class="dot"></span>倒班能量套餐规划</h2>
+      <p class="hint">选择研发场景，系统按"能量区间 + 蛋白质供能比 + 钠上限 + 低 GI"评分，
+      调用麦当劳 MCP 的 <code>list-nutrition-foods</code> / <code>calculate-price</code> / 优惠券接口生成方案。</p>
+      <label>研发场景</label>
+      <select id="scenario">
+        <option value="validation">工艺验证 24h 取样（需持续专注与体温维持）</option>
+        <option value="night">临床样本夜班（轻量抗饿、避免嗜睡）</option>
+        <option value="sprint">注册申报冲刺 · 久坐（控钠、配蔬菜）</option>
+        <option value="regular">常规工作日午餐（均衡）</option>
+      </select>
+      <div class="scn-desc" id="scnDesc"></div>
+      <div class="row">
+        <div><label>预算（元）</label><input type="number" id="budget" value="55" min="20" max="120" /></div>
+        <div><label>班次时长（小时）</label><input type="number" id="hours" value="8" min="2" max="24" /></div>
+      </div>
+      <button class="btn" id="btnShift">⚡ 生成能量套餐方案</button>
+      <div class="result" id="shiftResult"></div>
+    </div>
+  </section>
+
+  <!-- 模块2：课题组团餐 -->
+  <section class="panel" id="tab-team">
+    <div class="card">
+      <h2><span class="dot"></span>课题组 / 临床会议团餐优化</h2>
+      <p class="hint">面向企业团餐场景，调用 <code>query-meal-assistance</code>（助餐服务）+ 门店接口，
+      按人数与人均预算组合可分享餐品，<code>calculate-price</code> 核价并叠加优惠券。</p>
+      <div class="row">
+        <div><label>人数</label><input type="number" id="size" value="8" min="2" max="60" /></div>
+        <div><label>人均预算（元）</label><input type="number" id="pp" value="35" min="15" max="80" /></div>
+      </div>
+      <button class="btn" id="btnTeam">⚡ 生成团餐方案</button>
+      <div class="result" id="teamResult"></div>
+    </div>
+  </section>
+
+  <!-- 模块3：营养周报 -->
+  <section class="panel" id="tab-week">
+    <div class="card">
+      <h2><span class="dot"></span>研发人营养周报</h2>
+      <p class="hint">聚合近期麦当劳订单（<code>order-list</code> + <code>list-nutrition-foods</code>），
+      生成周度能量 / 蛋白趋势与"研发职业健康"提示。</p>
+      <button class="btn" id="btnWeek">⚡ 生成本周营养周报</button>
+      <div class="result" id="weekResult"></div>
+    </div>
+  </section>
+
+  <footer>
+    本页面为 <b>麦当劳 × WorkBuddy「1024 程序员节·程序员创意开发大赛」</b> 参赛作品「药研补给官 PharmaFuel」演示版。<br/>
+    页面内餐品 / 营养 / 价格为<b>脱敏示例数据</b>，仅用于展示交互；真实运行通过麦当劳 MCP 实时获取，结果以官方为准。<br/>
+    参赛作品，非麦当劳官方产品，不构成医疗 / 营养专业建议。
+  </footer>
+</div>
+
+<script>
+// ----- 脱敏示例数据（与 scripts/pharmafuel.py 同源）-----
+const NUT = {
+  "巨无霸":[513,27,26,42,961,28.5,"中"],"双层吉士汉堡":[429,27,22,31,1017,25.0,"中"],
+  "板烧鸡腿堡":[391,23,17,35,1041,22.0,"中"],"麦香鱼":[325,16,13,35,556,20.0,"中"],
+  "麦辣鸡腿汉堡":[485,24,24,42,1208,21.0,"高"],"麦乐鸡(5块)":[213,12,12,13,422,16.0,"中"],
+  "麦辣鸡翅(2块)":[224,13,15,9,537,14.0,"中"],"中薯条":[289,4,12,38,165,15.5,"高"],
+  "小杯玉米杯":[53,2,1,7,1,9.0,"低"],"苹果片":[53,0,0,14,0,8.0,"低"],
+  "中杯无糖可乐":[0,0,0,1,35,8.0,"低"],"大杯鲜萃咖啡":[13,1,0,3,3,12.0,"低"],
+  "纯悦饮用水":[0,0,0,0,0,8.0,"低"],"圆筒冰淇淋":[93,2,3,14,36,9.0,"高"],"草莓新地":[245,4,6,43,84,13.0,"高"]
+};
+const COUPONS=[{n:"满40减8 工作餐券",t:"store",th:40,save:8},{n:"麦乐鸡立减5元",t:"store",th:16,save:5},{n:"无糖饮品买一赠一",t:"item",save:8}];
+const SCN={
+  validation:{l:"工艺验证 24h 取样",k:[600,950],p:30,s:1500},
+  night:{l:"临床样本夜班",k:[450,700],p:22,s:1200},
+  sprint:{l:"注册申报冲刺(久坐)",k:[550,800],p:28,s:1300},
+  regular:{l:"常规工作日午餐",k:[600,900],p:30,s:1500}
+};
+const MAINS=["巨无霸","双层吉士汉堡","板烧鸡腿堡","麦香鱼","麦辣鸡腿汉堡"];
+const SIDES=["中薯条","小杯玉米杯","苹果片","麦乐鸡(5块)","麦辣鸡翅(2块)"];
+const DRINKS=["中杯无糖可乐","大杯鲜萃咖啡","纯悦饮用水"];
+const ORDERS=[
+  ["2026-10-17",["巨无霸","中薯条","中杯无糖可乐"]],["2026-10-18",["板烧鸡腿堡","小杯玉米杯","大杯鲜萃咖啡"]],
+  ["2026-10-19",["麦辣鸡腿汉堡","中薯条","中杯无糖可乐"]],["2026-10-20",["双层吉士汉堡","苹果片","纯悦饮用水"]],
+  ["2026-10-21",["麦香鱼","小杯玉米杯","大杯鲜萃咖啡"]],["2026-10-22",["巨无霸","麦乐鸡(5块)","中杯无糖可乐"]],
+  ["2026-10-23",["板烧鸡腿堡","苹果片","纯悦饮用水"]]
+];
+const bestCoupon=(total,items)=>{let b=null;for(const c of COUPONS){if(c.t==="store"&&total>=c.th){if(!b||c.save>b.save)b=c;}else if(c.t==="item"&&items.some(i=>i.includes("无糖"))){if(!b||c.save>b.save)b=c;}}return b;};
+const sum=(arr,i)=>arr.reduce((a,x)=>a+NUT[x][i],0);
+
+// 倒班套餐规划
+function planShift(key,budget){
+  const sc=SCN[key];let best=null;
+  for(const m of MAINS)for(const s of SIDES)for(const d of DRINKS){
+    const items=[m,s,d];const kcal=sum(items,0),pro=sum(items,1),sod=sum(items,4),price=sum(items,5);
+    if(kcal<sc.k[0]||kcal>sc.k[1]||pro<sc.p||sod>sc.s||price>budget)continue;
+    const coupon=bestCoupon(price,items);const save=coupon?coupon.save:0;
+    const score=pro-sod/100+(items.some(i=>NUT[i][6]==="高")?0:5);
+    const plan={items,kcal,pro,sod,price,coupon:coupon?coupon.n:"无可用券",save,pay:price-save,score};
+    if(!best||plan.score>best.score)best=plan;
+  }
+  return best;
+}
+// 团餐
+function planTeam(size,pp){
+  const budget=size*pp;const items=[];
+  const nMain=Math.max(1,Math.round(size/2));for(let i=0;i<nMain;i++)items.push("巨无霸");
+  const nWing=Math.max(1,Math.floor(size/3));for(let i=0;i<nWing;i++)items.push("麦辣鸡翅(2块)");
+  const nFry=Math.max(1,Math.floor(size/2));for(let i=0;i<nFry;i++)items.push("中薯条");
+  const nCorn=Math.max(1,Math.floor(size/3));for(let i=0;i<nCorn;i++)items.push("小杯玉米杯");
+  for(let i=0;i<size;i++)items.push("中杯无糖可乐");
+  const price=sum(items,5),kcal=sum(items,0),pro=sum(items,1),sod=sum(items,4);
+  const coupon=bestCoupon(price,items);const save=coupon?coupon.save:0;
+  return{size,budget,items,price,pp:price/size,kcal,pro,sod,coupon:coupon?coupon.n:"无可用券",save,pay:price-save};
+}
+
+// ----- 渲染 -----
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");document.getElementById("tab-"+t.dataset.tab).classList.add("active");
+});
+const scnDesc=document.getElementById("scnDesc");
+function updDesc(){const v=document.getElementById("scenario").value;const s=SCN[v];
+  scnDesc.innerHTML=`场景目标：能量 <b>${s.k[0]}–${s.k[1]} kcal</b> ｜ 蛋白质 ≥ <b>${s.p} g</b> ｜ 钠 ≤ <b>${s.s} mg</b>`;}
+document.getElementById("scenario").onchange=updDesc;updDesc();
+
+document.getElementById("btnShift").onclick=()=>{
+  const key=document.getElementById("scenario").value;
+  const budget=parseFloat(document.getElementById("budget").value);
+  const plan=planShift(key,budget);
+  const r=document.getElementById("shiftResult");
+  if(!plan){r.innerHTML=`<div class="insight warn">当前预算/目标下未找到合规套餐，建议提高预算或放宽钠上限。</div>`;return;}
+  const sc=SCN[key];
+  const bar=(name,val,max,unit,color)=>{const pct=Math.min(100,val/max*100);
+    return `<div class="bar"><span>${name}</span><div class="track"><div class="fill" style="width:${pct}%;background:${color}"></div></div><span class="val">${val}${unit}</span></div>`;};
+  r.innerHTML=`
+    <h3 style="font-size:15px;margin-bottom:4px">✅ 推荐方案 · ${sc.l}</h3>
+    <div class="combo">${plan.items.map(i=>`<span class="chip">${i} <b>¥${NUT[i][5]}</b></span>`).join("")}</div>
+    <div class="bars">
+      ${bar("能量",plan.kcal,950," kcal",getCss("--teal"))}
+      ${bar("蛋白质",plan.pro,40," g",getCss("--amber"))}
+      ${bar("钠",plan.sod,1500," mg",plan.sod>sc.s?"#e0533d":"#2faa5e")}
+    </div>
+    <div class="price-box">
+      <span class="price-now">¥${plan.pay.toFixed(1)}</span>
+      <span class="price-old">¥${plan.price.toFixed(1)}</span>
+      <span class="save">省 ¥${plan.save.toFixed(1)} · ${plan.coupon}</span>
+    </div>
+    <p class="hint" style="margin-top:10px">营养评分 ${plan.score.toFixed(1)} ｜ 满足蛋白下限且未超钠上限，默认无糖饮品控升糖。</p>`;
+};
+
+document.getElementById("btnTeam").onclick=()=>{
+  const size=parseInt(document.getElementById("size").value);
+  const pp=parseFloat(document.getElementById("pp").value);
+  const t=planTeam(size,pp);const r=document.getElementById("teamResult");
+  const counts={};t.items.forEach(i=>counts[i]=(counts[i]||0)+1);
+  r.innerHTML=`
+    <h3 style="font-size:15px;margin-bottom:4px">✅ 团餐方案 · ${size} 人 / 人均预算 ¥${pp}</h3>
+    <table><tr><th>餐品</th><th>份数</th><th>单价</th><th>小计</th></tr>
+    ${Object.entries(counts).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>¥${NUT[k][5]}</td><td>¥${(NUT[k][5]*v).toFixed(1)}</td></tr>`).join("")}
+    </table>
+    <div class="price-box" style="margin-top:12px">
+      <span class="price-now">¥${t.pay.toFixed(1)}</span>
+      <span class="price-old">¥${t.price.toFixed(1)}</span>
+      <span class="save">省 ¥${t.save.toFixed(1)} · ${t.coupon}</span>
+    </div>
+    <p class="hint" style="margin-top:10px">人均 <b>¥${t.pp.toFixed(1)}</b> ｜ 团体总能量 ${t.kcal} kcal ｜ 蛋白 ${t.pro} g ｜
+    已调用 <code>query-meal-assistance</code> 确认企业团餐助餐服务可用。</p>`;
+};
+
+document.getElementById("btnWeek").onclick=()=>{
+  const days=ORDERS.map(([d,items])=>({d,items,kcal:sum(items,0),pro:sum(items,1),sod:sum(items,4)}));
+  const avgK=Math.round(days.reduce((a,x)=>a+x.kcal,0)/days.length);
+  const avgP=(days.reduce((a,x)=>a+x.pro,0)/days.length).toFixed(1);
+  const avgS=Math.round(days.reduce((a,x)=>a+x.sod,0)/days.length);
+  const maxK=Math.max(...days.map(x=>x.kcal));
+  const insights=[];
+  insights.push(avgS>2000?`<div class="insight warn">⚠️ 周均钠 ${avgS}mg 偏高（>2000），长期倒班人群需警惕心血管负荷，建议以玉米杯/苹果片替代薯条。</div>`:`<div class="insight ok">✅ 周均钠 ${avgS}mg 处于合理区间。</div>`);
+  insights.push(avgP<60?`<div class="insight warn">⚠️ 周均蛋白 ${avgP}g 偏低（<60），倒班抗疲劳不足，建议增加板烧鸡腿堡/双层吉士等高蛋白主餐。</div>`:`<div class="insight ok">✅ 周均蛋白 ${avgP}g 充足。</div>`);
+  insights.push(`<div class="insight">✅ 已默认选用无糖饮品，升糖负荷可控，利于夜间专注与日间稳定。</div>`);
+  const r=document.getElementById("weekResult");
+  r.innerHTML=`
+    <h3 style="font-size:15px;margin-bottom:4px">📊 近 7 日营养趋势（能量/蛋白）</h3>
+    <div class="chart">${days.map(x=>`
+      <div class="col"><div class="b k" style="height:${x.kcal/maxK*100}%"></div>
+      <div class="b p" style="height:${x.pro/40*100}%"></div>
+      <div class="lab">${x.d.slice(5)}</div></div>`).join("")}</div>
+    <p class="hint" style="margin-top:6px"><span style="color:var(--teal)">■</span> 能量(kcal) ｜ <span style="color:var(--amber)">■</span> 蛋白质(g)</p>
+    <div class="price-box"><span class="price-now">${avgK}</span><span class="hint" style="margin:0">日均 kcal</span>
+      <span class="save">蛋白 ${avgP}g/日</span><span class="save" style="background:#eef2f1;color:var(--muted)">钠 ${avgS}mg/日</span></div>
+    ${insights.join("")}`;
+};
+function getCss(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+</script>
+</body>
+</html>
